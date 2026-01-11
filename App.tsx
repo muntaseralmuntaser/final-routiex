@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
@@ -22,6 +21,7 @@ import { MarketCenter } from './components/MarketCenter';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthFlow } from './components/AuthFlow';
 import { IntroAnimation } from './components/IntroAnimation';
+import { LandingPage } from './components/LandingPage';
 import { TopAnalysts3D } from './components/TopAnalysts3D';
 import { WhaleWatch } from './components/WhaleWatch';
 import { HomeDashboard } from './components/HomeDashboard';
@@ -48,19 +48,20 @@ const INITIAL_MARKET_ITEMS: MarketplaceItem[] = [
 
 const INITIAL_USERS: UserProfile[] = [
     { id: '1', firstName: 'Ahmed', lastName: 'Al-Saud', name: 'Ahmed Al-Saud', email: 'ahmed@example.com', role: 'user', status: 'active', plan: 'Pro', joinedDate: '2023-12-01', lastLogin: '2024-03-15', ip: '192.168.1.4', isSeller: true, balance: 1250, aiUsageToday: 0 },
+    { id: '2', firstName: 'Official', lastName: 'Admin', name: 'Bayanat Admin', email: 'bayanatglobal@gmail.com', role: 'admin', status: 'active', plan: 'Institutional', joinedDate: '2024-01-01', lastLogin: '2024-03-20', ip: '1.1.1.1', isSeller: true, balance: 999999, aiUsageToday: 0 },
 ];
 
 const App: React.FC = () => {
   const [showIntro, setShowIntro] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authInitialMode, setAuthInitialMode] = useState<'login'|'register'>('login');
   
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentView, setView] = useState('home');
+  const [currentView, setView] = useState('landing');
   
   const [lang, setLang] = useState<LanguageCode>('en');
   const [isDark, setIsDark] = useState(true);
@@ -96,16 +97,18 @@ const App: React.FC = () => {
       
       if (adminStatus) {
           setCurrentUser({ 
-            id: 'admin', firstName: 'Admin', lastName: 'User', name: 'Administrator', email: 'admin@routiex.com', 
-            role: 'admin', status: 'active', plan: 'Institutional', joinedDate: '', lastLogin: '', ip: '', 
+            id: 'admin', firstName: userDetails.firstName, lastName: userDetails.lastName, name: userDetails.firstName + ' ' + userDetails.lastName, 
+            email: userDetails.email, role: 'admin', status: 'active', plan: 'Institutional', joinedDate: '2024-01-01', lastLogin: new Date().toISOString(), ip: '8.8.8.8', 
             isSeller: true, balance: 999999, aiUsageToday: 0
         });
+        setView('dashboard');
       } else {
           setCurrentUser({ 
             id: 'new-user', firstName: userDetails.firstName, lastName: userDetails.lastName, name: `${userDetails.firstName} ${userDetails.lastName}`,
             email: userDetails.email, role: 'user', status: 'active', plan: 'Free', joinedDate: new Date().toISOString(),
             lastLogin: new Date().toISOString(), ip: '127.0.0.1', isSeller: false, balance: 0, aiUsageToday: 0
         });
+        setView('home');
       }
       setNotifications(prev => [{ id: Date.now().toString(), title: 'Login Successful', message: `Welcome back, ${userDetails.firstName}`, time: 'Now', type: 'success', read: false }, ...prev]);
   };
@@ -123,10 +126,9 @@ const App: React.FC = () => {
       setIsAuthenticated(false);
       setIsAdmin(false);
       setCurrentUser(null);
-      setView('home'); 
+      setView('landing'); 
   };
 
-  // Updated to support custom strategies/scripts
   const handleGenerateSignal = async (symbol: string, price: number, strategy: string = 'SMC', customScript?: string) => {
     requireAuth(async () => {
         if (currentUser) {
@@ -135,12 +137,10 @@ const App: React.FC = () => {
              setIsSignalLoading(false);
              if (signal) {
                  setAiSignal(signal);
-                 // Add to history
                  setAiHistory(prev => [
                      { id: Date.now(), timestamp: new Date().toISOString(), symbol: signal.symbol, data: signal },
                      ...prev
                  ]);
-                 // Notification
                  setNotifications(prev => [{ id: Date.now().toString(), title: 'AI Analysis Complete', message: `Signal generated for ${symbol}`, time: 'Now', type: 'info', read: false }, ...prev]);
              }
         }
@@ -161,9 +161,9 @@ const App: React.FC = () => {
       }, 50);
   };
 
-  // --- VIEW RENDERER ---
   const renderView = () => {
     switch (currentView) {
+        case 'landing': return <LandingPage onLogin={() => requireAuth(() => {})} onRegister={() => { setAuthInitialMode('register'); setShowAuthModal(true); }} />;
         case 'home': return <HomeDashboard onShowSignal={(s) => setAiSignal(s)} />;
         case 'routiex-trading': return <VirtualTradingPlatform />;
         case 'news-terminal': return <NewsTerminal />;
@@ -208,10 +208,10 @@ const App: React.FC = () => {
   if (isAdmin) return <AdminPanel onLogout={handleLogout} users={users} setUsers={setUsers} marketItems={marketItems} setMarketItems={setMarketItems} />;
 
   return (
-    <div className="flex flex-col h-screen bg-terminal-bg text-terminal-text overflow-hidden transition-colors duration-300 font-sans relative">
+    <div className={`flex flex-col h-screen ${isDark ? 'bg-terminal-bg' : 'bg-[#f0f9ff]'} text-terminal-text overflow-hidden transition-colors duration-300 font-sans relative`}>
       {showAuthModal && <AuthFlow onLogin={handleLogin} onClose={() => setShowAuthModal(false)} initialMode={authInitialMode} />}
       
-      {currentView !== 'routiex-trading' && (
+      {currentView !== 'landing' && currentView !== 'routiex-trading' && (
           <Header 
             toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
             lang={lang} 
@@ -225,13 +225,12 @@ const App: React.FC = () => {
       )}
       
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar isOpen={sidebarOpen} currentView={currentView} setView={setView} lang={lang} />
-        <main className={`flex-1 overflow-y-auto custom-scrollbar relative bg-[#020617] ${currentView === 'routiex-trading' || currentView === 'home' || currentView === 'studio' || currentView === 'news-terminal' ? 'p-0' : 'p-2 md:p-3 lg:p-4'}`}>
+        {currentView !== 'landing' && <Sidebar isOpen={sidebarOpen} currentView={currentView} setView={setView} lang={lang} />}
+        <main className={`flex-1 overflow-y-auto custom-scrollbar relative bg-[#020617] ${currentView === 'routiex-trading' || currentView === 'home' || currentView === 'studio' || currentView === 'news-terminal' || currentView === 'landing' ? 'p-0' : 'p-2 md:p-3 lg:p-4'}`}>
             {renderView()}
         </main>
       </div>
       
-      {/* Global AI Signal Modal (if activated from other views) */}
       {aiSignal && currentView !== 'ai-analysis' && (
           <div className="fixed inset-0 z-[9999] pointer-events-auto">
               <AiAnalyzerWidget 
@@ -250,7 +249,6 @@ const App: React.FC = () => {
           </div>
       )}
 
-      {/* SYSTEM CHECK MODAL ("CHECK ALL") */}
       {isSystemCheckOpen && (
           <div className="fixed inset-0 z-[10000] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md">
               <div className="w-full max-w-lg bg-[#0f111a] border border-[#1e2235] rounded-2xl shadow-2xl p-8 relative overflow-hidden">
@@ -277,7 +275,6 @@ const App: React.FC = () => {
                       ))}
                   </div>
 
-                  {/* Progress Bar */}
                   <div className="w-full bg-[#1e2235] h-2 rounded-full overflow-hidden mb-6">
                       <div className="h-full bg-terminal-accent transition-all duration-100 ease-out" style={{ width: `${checkProgress}%` }}></div>
                   </div>
@@ -286,9 +283,6 @@ const App: React.FC = () => {
                       <div className="flex gap-4 animate-in fade-in slide-in-from-bottom-2">
                           <button onClick={() => setIsSystemCheckOpen(false)} className="flex-1 bg-white text-black py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors">
                               Access Terminal
-                          </button>
-                          <button onClick={() => alert('PWA Install Prompt Triggered')} className="flex-1 bg-[#1e2235] text-white py-3 rounded-lg font-bold border border-[#333] hover:bg-[#2a2f45] flex items-center justify-center gap-2">
-                              <Download size={16} /> Install App
                           </button>
                       </div>
                   )}

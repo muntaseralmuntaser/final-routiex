@@ -3,8 +3,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { MarketSignal, TradeHistory, Timeframe, AiSignalResponse, TradingStrategy } from "../types";
 
 // Initialize Gemini Client
-const apiKey = process.env.API_KEY || ''; 
-const ai = new GoogleGenAI({ apiKey });
+// Fix: Use process.env.API_KEY directly and ensure proper initialization as per guidelines
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export interface NewsAnalysisResult {
     sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
@@ -16,7 +16,8 @@ export interface NewsAnalysisResult {
 }
 
 export const analyzeNewsImpact = async (headline: string, symbol: string): Promise<NewsAnalysisResult | null> => {
-    if (!apiKey) return null;
+    // Fix: Assume API_KEY availability or handle gracefully using process.env.API_KEY
+    if (!process.env.API_KEY) return null;
 
     try {
         const prompt = `
@@ -32,8 +33,9 @@ export const analyzeNewsImpact = async (headline: string, symbol: string): Promi
         Output JSON only.
         `;
 
+        // Fix: Use the recommended gemini-3-flash-preview model for basic text analysis tasks
         const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash-exp',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -62,7 +64,7 @@ export const analyzeNewsImpact = async (headline: string, symbol: string): Promi
 };
 
 export const generateRoutiexSignal = async (symbol: string, price: number, timeframe: string, strategy: string, customScript?: string): Promise<AiSignalResponse | null> => {
-    if (!apiKey) return null;
+    if (!process.env.API_KEY) return null;
 
     try {
         const prompt = `
@@ -104,8 +106,9 @@ export const generateRoutiexSignal = async (symbol: string, price: number, timef
         }
         `;
 
+        // Fix: Use gemini-3-pro-preview for complex reasoning tasks that utilize tools like googleSearch
         const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash-exp',
+            model: 'gemini-3-pro-preview',
             contents: prompt,
             config: {
                 tools: [{ googleSearch: {} }]
@@ -125,10 +128,11 @@ export const generateRoutiexSignal = async (symbol: string, price: number, timef
 };
 
 export const generateTradeFeedback = async (trades: TradeHistory[]): Promise<string> => {
-  if (!apiKey) return "API Key Missing.";
+  if (!process.env.API_KEY) return "API Key Missing.";
   const recentTrades = trades.slice(0, 5).map(t => `${t.type} ${t.symbol} @ ${t.openPrice}`).join('\n');
+  // Fix: Use the recommended gemini-3-flash-preview model
   const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash-exp",
+    model: "gemini-3-flash-preview",
     contents: `Review these trades and give institutional risk feedback: ${recentTrades}`,
   });
   return response.text || "No feedback.";
