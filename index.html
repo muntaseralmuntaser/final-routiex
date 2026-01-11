@@ -41,11 +41,21 @@
               'spin-slow': 'spin 12s linear infinite',
               'bounce-slow': 'bounce 2s infinite',
               'brand-glow': 'brandGlow 8s ease-in-out infinite',
+              'grid-move': 'gridMove 20s linear infinite',
+              'scan-line': 'scanLine 4s linear infinite',
             },
             keyframes: {
               brandGlow: {
                 '0%, 100%': { opacity: '0.03', transform: 'scale(1) rotate(0deg)' },
                 '50%': { opacity: '0.08', transform: 'scale(1.1) rotate(3deg)' },
+              },
+              gridMove: {
+                '0%': { backgroundPosition: '0 0' },
+                '100%': { backgroundPosition: '40px 40px' },
+              },
+              scanLine: {
+                '0%': { top: '-100%' },
+                '100%': { top: '200%' },
               },
               flashGreen: {
                 '0%': { backgroundColor: 'rgba(16, 185, 129, 0.4)' },
@@ -136,6 +146,12 @@
           z-index: 50;
           pointer-events: none;
       }
+
+      .landing-grid {
+        background-image: linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px), 
+                          linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
     </style>
   <script type="importmap">
 {
@@ -155,6 +171,5 @@
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

@@ -3,7 +3,7 @@ import { Logo } from './Logo';
 import { 
     ArrowRight, PlayCircle, TrendingUp, Shield, Users, Globe, ChevronRight, 
     Zap, BrainCircuit, Activity, BarChart2, ShieldCheck, Laptop, Smartphone,
-    PieChart, Layers, Database, Cpu, Lock
+    PieChart, Layers, Database, Cpu, Lock, MousePointer2, Target, Gauge, ArrowUpRight
 } from 'lucide-react';
 import { TopAnalysts3D } from './TopAnalysts3D';
 
@@ -16,10 +16,19 @@ export const LandingPage: React.FC<Props> = ({ onLogin, onRegister }) => {
     return (
         <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-terminal-accent selection:text-black overflow-x-hidden">
             
-            {/* Immersive Background Elements */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px]"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-terminal-accent/5 rounded-full blur-[120px]"></div>
+            {/* --- IMMERSIVE ANIMATED BACKGROUND --- */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                {/* 1. Moving Grid */}
+                <div className="absolute inset-0 landing-grid opacity-30 animate-grid-move"></div>
+                
+                {/* 2. Scanning Line */}
+                <div className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-terminal-accent to-transparent opacity-20 animate-scan-line"></div>
+                
+                {/* 3. Deep Blur Orbs */}
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-900/10 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-terminal-accent/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                
+                {/* 4. Subtle Texture */}
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
             </div>
 
@@ -35,7 +44,7 @@ export const LandingPage: React.FC<Props> = ({ onLogin, onRegister }) => {
                 
                 <div className="hidden lg:flex items-center gap-10 text-[11px] font-black uppercase tracking-widest text-gray-500">
                     <a href="#company" className="hover:text-terminal-accent transition-colors">Company</a>
-                    <a href="#terminal" className="hover:text-terminal-accent transition-colors">Terminal</a>
+                    <a href="#terminal" className="hover:text-terminal-accent transition-colors">Terminal Preview</a>
                     <a href="#intelligence" className="hover:text-terminal-accent transition-colors">AI Intelligence</a>
                     <a href="#services" className="hover:text-terminal-accent transition-colors">Solutions</a>
                 </div>
@@ -65,7 +74,7 @@ export const LandingPage: React.FC<Props> = ({ onLogin, onRegister }) => {
                     Bayanat Tech introduces Routiex: A 4th-generation institutional terminal powered by Deep Learning AI, providing high-conviction market matrix and global liquidity analysis.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-6 animate-in zoom-in-95 duration-700 delay-500">
+                <div className="flex flex-col sm:flex-row items-center gap-6 animate-in zoom-in-95 duration-700 delay-500 mb-20">
                     <button onClick={onRegister} className="px-10 py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-terminal-accent transition-all flex items-center gap-3 shadow-2xl">
                         Open Pro Account <ArrowRight size={20} />
                     </button>
@@ -74,8 +83,117 @@ export const LandingPage: React.FC<Props> = ({ onLogin, onRegister }) => {
                     </button>
                 </div>
 
-                {/* 3D Immersive Cards Section */}
-                <div className="w-full mt-32 max-w-7xl mx-auto">
+                {/* --- 3D PERSPECTIVE DASHBOARD PREVIEW --- */}
+                <div id="terminal" className="w-full max-w-7xl mx-auto mt-10 perspective-2000 animate-in fade-in duration-1000 delay-700">
+                    <div className="relative transform rotate-x-12 rotate-y-[-10deg] rotate-z-[-2deg] transition-transform hover:rotate-x-6 hover:rotate-y-[-5deg] duration-1000 group">
+                        
+                        {/* Shadow Glow */}
+                        <div className="absolute inset-0 bg-terminal-accent/10 blur-[100px] -z-10 group-hover:bg-terminal-accent/20 transition-all duration-1000"></div>
+
+                        {/* Main Mockup Body */}
+                        <div className="bg-[#0f172a] border border-[#1e293b] rounded-2xl overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.5)] flex flex-col ring-1 ring-white/10">
+                            
+                            {/* Fake Toolbar */}
+                            <div className="h-10 bg-[#020617] border-b border-white/5 flex items-center px-4 gap-4">
+                                <div className="flex gap-1.5">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/30"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/30"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/30"></div>
+                                </div>
+                                <div className="flex-1 bg-white/5 h-5 rounded mx-10"></div>
+                                <div className="flex gap-3">
+                                    <div className="w-4 h-4 bg-white/10 rounded"></div>
+                                    <div className="w-4 h-4 bg-white/10 rounded"></div>
+                                </div>
+                            </div>
+
+                            <div className="flex h-[500px] relative">
+                                {/* Side Menu Preview */}
+                                <div className="w-16 border-r border-white/5 flex flex-col items-center py-6 gap-6 bg-[#0a0a0f]">
+                                    <div className="w-8 h-8 bg-terminal-accent/20 rounded-lg flex items-center justify-center text-terminal-accent"><Activity size={16} /></div>
+                                    <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-gray-600"><Layers size={16} /></div>
+                                    <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-gray-600"><Target size={16} /></div>
+                                    <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-gray-600"><Globe size={16} /></div>
+                                </div>
+
+                                {/* Dashboard Content Mock */}
+                                <div className="flex-1 p-6 grid grid-cols-12 gap-4 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+                                    
+                                    {/* Chart Area */}
+                                    <div className="col-span-8 bg-[#020617]/50 border border-white/5 rounded-xl p-4 flex flex-col">
+                                        <div className="flex justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                                <span className="text-xs font-black">XAUUSD Live Feed</span>
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <div className="w-6 h-4 bg-white/5 rounded text-[8px] flex items-center justify-center">1H</div>
+                                                <div className="w-6 h-4 bg-terminal-accent/20 rounded text-[8px] flex items-center justify-center text-terminal-accent">4H</div>
+                                            </div>
+                                        </div>
+                                        {/* Chart Visuals */}
+                                        <div className="flex-1 flex items-end gap-1 px-4">
+                                            {Array.from({length: 40}).map((_, i) => (
+                                                <div key={i} className={`flex-1 rounded-t-sm ${i % 3 === 0 ? 'bg-red-500/20' : 'bg-green-500/20'}`} style={{ height: `${Math.random()*80 + 10}%` }}></div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Intelligence Panel */}
+                                    <div className="col-span-4 space-y-4">
+                                        <div className="bg-[#0a0a0f] border border-white/5 rounded-xl p-4 flex flex-col">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <BrainCircuit size={16} className="text-terminal-accent" />
+                                                <span className="text-[10px] font-black uppercase text-terminal-accent">AI Signal Engine</span>
+                                            </div>
+                                            <div className="p-2 bg-terminal-accent/5 rounded border border-terminal-accent/10">
+                                                <div className="flex justify-between text-[9px] mb-1"><span className="text-gray-400">Bias</span><span className="text-green-500 font-bold">STRONG BUY</span></div>
+                                                <div className="flex justify-between text-[9px] mb-1"><span className="text-gray-400">Target</span><span className="text-white font-mono">$2,245.00</span></div>
+                                                <div className="flex justify-between text-[9px]"><span className="text-gray-400">Conf.</span><span className="text-terminal-accent font-bold">92%</span></div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-[#0a0a0f] border border-white/5 rounded-xl p-4 flex flex-col flex-1">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Gauge size={16} className="text-purple-500" />
+                                                <span className="text-[10px] font-black uppercase text-white/50">Market Velocity</span>
+                                            </div>
+                                            <div className="flex-1 flex items-center justify-center">
+                                                 <div className="w-20 h-10 border-t-2 border-r-2 border-l-2 border-terminal-accent/30 rounded-t-full relative">
+                                                     <div className="absolute bottom-0 left-1/2 w-8 h-1 bg-terminal-accent -translate-x-1/2 rotate-[-45deg] origin-left"></div>
+                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Activity Bar */}
+                                    <div className="col-span-12 h-16 bg-[#020617] border border-white/5 rounded-xl p-3 flex items-center justify-between">
+                                        <div className="flex gap-4 items-center">
+                                            <div className="text-[9px]"><div className="text-gray-500 uppercase font-bold">DXY Impact</div><div className="text-red-500 font-bold">BEARISH</div></div>
+                                            <div className="text-[9px] border-l border-white/10 pl-4"><div className="text-gray-500 uppercase font-bold">Volatility</div><div className="text-yellow-500 font-bold">HIGH</div></div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div>
+                                            <span className="text-[10px] font-mono text-gray-500 tracking-widest">BRIDGE_STATUS_OK_2ms</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Floating Labels around the preview */}
+                        <div className="absolute -top-10 -left-10 bg-black/80 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-xl flex items-center gap-3 animate-bounce-slow">
+                            <Activity size={14} className="text-green-500" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Real-time Data Grid</span>
+                        </div>
+                        <div className="absolute top-1/2 -right-12 bg-black/80 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-xl flex items-center gap-3 animate-bounce-slow" style={{ animationDelay: '1s' }}>
+                            <ShieldCheck size={14} className="text-blue-500" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Secure MT5 Bridge</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Top Analysts Scroller Section */}
+                <div className="w-full mt-40 max-w-7xl mx-auto">
                     <div className="mb-10 text-left px-4">
                         <h2 className="text-xs font-black text-terminal-accent uppercase tracking-[0.4em] mb-2">Live Ecosystem</h2>
                         <h3 className="text-3xl font-black text-white tracking-tight">Institutional Analysts Online</h3>
