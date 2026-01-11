@@ -32,7 +32,7 @@ export const WhaleWatch: React.FC = () => {
             <div className="p-3 border-b border-terminal-border bg-terminal-bg flex justify-between items-center">
                 <h3 className="text-sm font-bold text-terminal-text flex items-center gap-2">
                     <Anchor size={16} className="text-blue-500" />
-                    WHALE WATCH <span className="text-[9px] text-terminal-muted opacity-70">BLOCK ORDERS > $1M</span>
+                    WHALE WATCH <span className="text-[9px] text-terminal-muted opacity-70">BLOCK ORDERS &gt; $1M</span>
                 </h3>
                 <Activity size={14} className="text-blue-500 animate-pulse" />
             </div>
