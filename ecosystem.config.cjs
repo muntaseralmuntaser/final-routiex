@@ -1,19 +1,16 @@
 module.exports = {
   apps: [
     {
-      name: 'routiex-terminal-pro',
+      name: 'trading-dashboard',
       script: 'npx',
-      args: 'vite preview --port 3000 --host 0.0.0.0',
+      args: 'wrangler pages dev dist --d1=trading-db-production --local --ip 0.0.0.0 --port 3000',
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: 'development',
         PORT: 3000
       },
       watch: false,
       instances: 1,
-      exec_mode: 'fork',
-      autorestart: true,
-      max_restarts: 10,
-      min_uptime: '10s'
+      exec_mode: 'fork'
     }
   ]
 }
