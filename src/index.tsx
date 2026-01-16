@@ -342,26 +342,188 @@ app.get('/', (c) => {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .feature-card:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #0a0e27;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(17, 24, 39, 0.8) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 27, 75, 0.8) 0px, transparent 50%);
+            overflow-x: hidden;
+        }
+        
+        /* Animated gradient background */
+        .dark-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 3D Card Effect */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+        }
+        
+        .card-3d:hover {
+            transform: translateY(-20px) rotateX(10deg) rotateY(5deg);
+            box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.5);
+        }
+        
+        .card-3d::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 1rem;
+            padding: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .card-3d:hover::before {
+            opacity: 1;
+        }
+        
+        /* Glowing text effect */
+        .glow-text {
+            text-shadow: 0 0 20px rgba(124, 58, 237, 0.8),
+                        0 0 40px rgba(124, 58, 237, 0.6),
+                        0 0 60px rgba(124, 58, 237, 0.4);
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(124, 58, 237, 0.8); }
+            50% { text-shadow: 0 0 40px rgba(124, 58, 237, 1), 0 0 60px rgba(124, 58, 237, 0.8); }
+        }
+        
+        /* Floating animation */
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* Particle background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(124, 58, 237, 0.5);
+            border-radius: 50%;
+            animation: particleFloat 20s infinite;
+        }
+        
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+        
+        /* 3D Button */
+        .btn-3d {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.3s;
+        }
+        
+        .btn-3d:hover {
+            transform: translateY(-5px) rotateX(10deg);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.4);
+        }
+        
+        .btn-3d:active {
+            transform: translateY(-2px) rotateX(5deg);
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Icon pulse */
+        .icon-pulse {
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900 text-white">
+    <!-- Animated particles -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 10s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 12s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 14s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 16s;"></div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <nav class="glass fixed w-full top-0 z-50 border-b border-white/10">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-chart-line text-3xl gradient-text"></i>
-                    <span class="text-2xl font-bold gradient-text">TradePro</span>
+                <div class="flex items-center space-x-2 float">
+                    <i class="fas fa-chart-line text-3xl gradient-text icon-pulse"></i>
+                    <span class="text-2xl font-bold text-white">TradePro</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="#features" class="text-gray-600 hover:text-purple-600 font-medium">Features</a>
-                    <a href="#about" class="text-gray-600 hover:text-purple-600 font-medium">About</a>
-                    <a href="#integrations" class="text-gray-600 hover:text-purple-600 font-medium">Integrations</a>
+                    <a href="#features" class="text-gray-300 hover:text-purple-400 font-medium transition-all hover:scale-110">Features</a>
+                    <a href="#about" class="text-gray-300 hover:text-purple-400 font-medium transition-all hover:scale-110">About</a>
+                    <a href="#integrations" class="text-gray-300 hover:text-purple-400 font-medium transition-all hover:scale-110">Integrations</a>
                 </div>
-                <button onclick="showAuthModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition">
+                <button onclick="showAuthModal()" class="btn-3d dark-gradient text-white px-6 py-2 rounded-lg font-bold">
                     <i class="fas fa-sign-in-alt mr-2"></i>Sign In
                 </button>
             </div>
@@ -369,21 +531,30 @@ app.get('/', (c) => {
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-32 pb-20 gradient-bg">
-        <div class="container mx-auto px-6 text-center text-white">
-            <h1 class="text-5xl md:text-6xl font-bold mb-6">
-                Professional Trading<br>Made Simple
+    <section class="relative pt-32 pb-20 overflow-hidden">
+        <div class="absolute inset-0 dark-gradient opacity-20"></div>
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <h1 class="text-6xl md:text-8xl font-bold mb-6 glow-text">
+                Professional Trading<br><span class="gradient-text">Made Simple</span>
             </h1>
-            <p class="text-xl md:text-2xl mb-8 opacity-90">
+            <p class="text-xl md:text-3xl mb-12 text-gray-300 float">
                 Connect MT4/MT5, manage trades, and stay updated with real-time notifications
             </p>
-            <div class="flex justify-center space-x-4">
-                <button onclick="showAuthModal()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transition">
-                    Get Started Free
+            <div class="flex justify-center space-x-6">
+                <button onclick="showAuthModal()" class="btn-3d dark-gradient text-white px-12 py-5 rounded-xl font-bold text-lg relative overflow-hidden group">
+                    <span class="relative z-10">Get Started Free</span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
-                <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-purple-600 transition">
-                    Watch Demo
+                <button onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})" class="glass border-2 border-purple-500 text-white px-12 py-5 rounded-xl font-bold text-lg hover:bg-purple-500/20 transition-all">
+                    Explore Features
                 </button>
+            </div>
+            
+            <!-- 3D floating elements -->
+            <div class="mt-20 relative">
+                <div class="absolute top-0 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+                <div class="absolute top-0 right-1/4 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+                <div class="absolute bottom-0 left-1/3 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
             </div>
         </div>
     </section>
