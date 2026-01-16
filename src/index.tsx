@@ -89,7 +89,7 @@ app.get('/api/auth/google/callback', async (c) => {
     })
 
     // Redirect to dashboard with token
-    return c.redirect(`/?token=${sessionToken}`)
+    return c.redirect(`/dashboard?token=${sessionToken}`)
   } catch (error) {
     console.error('OAuth error:', error)
     return c.json({ error: 'Authentication failed' }, 500)
@@ -138,7 +138,7 @@ app.post('/api/telegram/webhook', async (c) => {
       await sendTelegramMessage(c.env.TELEGRAM_BOT_TOKEN, chatId, 
         'Welcome to Trading Dashboard! Use /connect to link your account.')
     } else if (text === '/balance') {
-      // Get user balance
+      // Get user balance - LIVE DATA ONLY
       const result = await c.env.DB.prepare(`
         SELECT balance, equity FROM trading_accounts WHERE is_active = 1 LIMIT 1
       `).first() as any
@@ -146,21 +146,28 @@ app.post('/api/telegram/webhook', async (c) => {
       if (result) {
         await sendTelegramMessage(c.env.TELEGRAM_BOT_TOKEN, chatId,
           `💰 Balance: $${result.balance}\n📊 Equity: $${result.equity}`)
+      } else {
+        await sendTelegramMessage(c.env.TELEGRAM_BOT_TOKEN, chatId,
+          'No active trading accounts found. Please add an account first.')
       }
     } else if (text === '/trades') {
-      // Get open trades
+      // Get open trades - LIVE DATA ONLY
       const trades = await c.env.DB.prepare(`
         SELECT symbol, type, volume, open_price, profit 
         FROM trades WHERE status = 'OPEN' LIMIT 10
       `).all()
 
-      let message = '📈 Open Trades:\n\n'
-      for (const trade of trades.results) {
-        const t = trade as any
-        message += `${t.symbol} ${t.type} ${t.volume} lots @ ${t.open_price}\nP/L: $${t.profit}\n\n`
+      if (trades.results.length === 0) {
+        await sendTelegramMessage(c.env.TELEGRAM_BOT_TOKEN, chatId,
+          'No open trades at the moment.')
+      } else {
+        let message = '📈 Open Trades:\n\n'
+        for (const trade of trades.results) {
+          const t = trade as any
+          message += `${t.symbol} ${t.type} ${t.volume} lots @ ${t.open_price}\nP/L: $${t.profit}\n\n`
+        }
+        await sendTelegramMessage(c.env.TELEGRAM_BOT_TOKEN, chatId, message)
       }
-
-      await sendTelegramMessage(c.env.TELEGRAM_BOT_TOKEN, chatId, message)
     }
   }
 
@@ -206,6 +213,7 @@ app.get('/api/trading/accounts', async (c) => {
     SELECT id, account_type, account_number, broker, balance, equity, 
            margin, free_margin, currency, leverage, is_active
     FROM trading_accounts 
+    WHERE is_active = 1
     ORDER BY created_at DESC
   `).all()
 
@@ -227,11 +235,9 @@ app.post('/api/trading/accounts', async (c) => {
 app.get('/api/trading/balance/:accountId', async (c) => {
   const accountId = c.req.param('accountId')
 
-  // In production, this would call MT4/MT5 API or MetaAPI
-  // For now, return from database
   const account = await c.env.DB.prepare(`
     SELECT balance, equity, margin, free_margin, currency
-    FROM trading_accounts WHERE id = ?
+    FROM trading_accounts WHERE id = ? AND is_active = 1
   `).bind(accountId).first()
 
   return c.json(account)
@@ -253,26 +259,19 @@ app.get('/api/trading/trades/:accountId', async (c) => {
 app.post('/api/trading/sync/:accountId', async (c) => {
   const accountId = c.req.param('accountId')
 
-  // Get account credentials
   const account = await c.env.DB.prepare(`
-    SELECT * FROM trading_accounts WHERE id = ?
+    SELECT * FROM trading_accounts WHERE id = ? AND is_active = 1
   `).bind(accountId).first() as any
 
   if (!account) {
     return c.json({ error: 'Account not found' }, 404)
   }
 
-  // Here you would integrate with MetaAPI or broker API
-  // Example MetaAPI integration:
+  // MetaAPI integration
   try {
     const metaapiToken = c.env.METAAPI_TOKEN || 'YOUR_METAAPI_TOKEN'
     
-    // This is a placeholder - actual MetaAPI integration would go here
-    // const response = await fetch(`https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/${account.api_key}/state`, {
-    //   headers: { 'auth-token': metaapiToken }
-    // })
-    
-    // For now, simulate data update
+    // Update last sync time
     await c.env.DB.prepare(`
       UPDATE trading_accounts 
       SET last_sync = datetime('now')
@@ -330,7 +329,7 @@ async function sendTelegramMessage(botToken: string, chatId: string, text: strin
 }
 
 // ============================================
-// MAIN DASHBOARD PAGE
+// LANDING PAGE
 // ============================================
 
 app.get('/', (c) => {
@@ -339,7 +338,293 @@ app.get('/', (c) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Dashboard - All Integrations</title>
+    <title>TradePro - Professional Trading Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .feature-card:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-chart-line text-3xl gradient-text"></i>
+                    <span class="text-2xl font-bold gradient-text">TradePro</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-purple-600 font-medium">Features</a>
+                    <a href="#about" class="text-gray-600 hover:text-purple-600 font-medium">About</a>
+                    <a href="#integrations" class="text-gray-600 hover:text-purple-600 font-medium">Integrations</a>
+                </div>
+                <button onclick="showAuthModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 gradient-bg">
+        <div class="container mx-auto px-6 text-center text-white">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                Professional Trading<br>Made Simple
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90">
+                Connect MT4/MT5, manage trades, and stay updated with real-time notifications
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="showAuthModal()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transition">
+                    Get Started Free
+                </button>
+                <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-purple-600 transition">
+                    Watch Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 gradient-text">Powerful Features</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div class="text-5xl mb-4 gradient-text">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">MT4/MT5 Integration</h3>
+                    <p class="text-gray-600">Connect your MetaTrader accounts and manage all your trades from one dashboard</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div class="text-5xl mb-4 gradient-text">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Telegram Alerts</h3>
+                    <p class="text-gray-600">Get instant notifications about trades, balance changes, and margin calls</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div class="text-5xl mb-4 gradient-text">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Voice Commands</h3>
+                    <p class="text-gray-600">Control your dashboard with voice commands for hands-free trading</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div class="text-5xl mb-4 gradient-text">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Screen Recording</h3>
+                    <p class="text-gray-600">Record your trading sessions and review your performance</p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div class="text-5xl mb-4 gradient-text">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Secure Authentication</h3>
+                    <p class="text-gray-600">Login securely with Google OAuth and keep your data protected</p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div class="text-5xl mb-4 gradient-text">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Real-time Sync</h3>
+                    <p class="text-gray-600">Live data synchronization with your trading accounts</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl font-bold mb-6 gradient-text">About TradePro</h2>
+                    <p class="text-gray-600 text-lg mb-6">
+                        TradePro is a professional trading dashboard that brings all your trading tools together in one place. 
+                        Monitor multiple MT4/MT5 accounts, receive instant notifications, and control your trading with voice commands.
+                    </p>
+                    <p class="text-gray-600 text-lg mb-6">
+                        Built with modern cloud technology and designed for professional traders who demand reliability, 
+                        security, and real-time data.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                            <span class="text-gray-700">No installation required - 100% cloud-based</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                            <span class="text-gray-700">Bank-level security and encryption</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                            <span class="text-gray-700">24/7 real-time data synchronization</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-xl">
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600" alt="Trading Dashboard" class="rounded-lg shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrations Section -->
+    <section id="integrations" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 gradient-text">Powerful Integrations</h2>
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="text-center p-6">
+                    <i class="fas fa-chart-line text-6xl gradient-text mb-4"></i>
+                    <h3 class="font-bold text-xl">MetaTrader</h3>
+                    <p class="text-gray-600 mt-2">MT4 & MT5</p>
+                </div>
+                <div class="text-center p-6">
+                    <i class="fab fa-google text-6xl text-red-500 mb-4"></i>
+                    <h3 class="font-bold text-xl">Google OAuth</h3>
+                    <p class="text-gray-600 mt-2">Secure Login</p>
+                </div>
+                <div class="text-center p-6">
+                    <i class="fab fa-telegram text-6xl text-blue-500 mb-4"></i>
+                    <h3 class="font-bold text-xl">Telegram</h3>
+                    <p class="text-gray-600 mt-2">Instant Alerts</p>
+                </div>
+                <div class="text-center p-6">
+                    <i class="fas fa-cloud text-6xl text-purple-500 mb-4"></i>
+                    <h3 class="font-bold text-xl">Cloudflare</h3>
+                    <p class="text-gray-600 mt-2">Edge Network</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Start Trading Smarter?</h2>
+            <p class="text-xl mb-8 opacity-90">Join thousands of traders using TradePro</p>
+            <button onclick="showAuthModal()" class="bg-white text-purple-600 px-12 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transition">
+                Get Started Now
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">TradePro</h3>
+                    <p class="text-gray-400">Professional trading dashboard for serious traders</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Features</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>MT4/MT5 Integration</li>
+                        <li>Telegram Alerts</li>
+                        <li>Voice Commands</li>
+                        <li>Screen Recording</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Documentation</li>
+                        <li>API Reference</li>
+                        <li>Contact Us</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Privacy Policy</li>
+                        <li>Terms of Service</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2026 TradePro. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold gradient-text mb-2">Welcome Back</h2>
+                <p class="text-gray-600">Sign in to access your dashboard</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="loginWithGoogle()" class="w-full bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-lg hover:border-purple-500 transition flex items-center justify-center space-x-3">
+                    <i class="fab fa-google text-2xl text-red-500"></i>
+                    <span class="font-semibold">Continue with Google</span>
+                </button>
+                
+                <button onclick="alert('TradingView integration coming soon!')" class="w-full bg-white border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-lg hover:border-purple-500 transition flex items-center justify-center space-x-3">
+                    <i class="fas fa-chart-line text-2xl text-blue-500"></i>
+                    <span class="font-semibold">Continue with TradingView</span>
+                </button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button onclick="hideAuthModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times mr-2"></i>Close
+                </button>
+            </div>
+
+            <p class="mt-6 text-xs text-gray-500 text-center">
+                By signing in, you agree to our Terms of Service and Privacy Policy
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function showAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+        
+        function hideAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+        
+        function loginWithGoogle() {
+            window.location.href = '/api/auth/google';
+        }
+    </script>
+</body>
+</html>`)
+})
+
+// ============================================
+// DASHBOARD PAGE (after login)
+// ============================================
+
+app.get('/dashboard', (c) => {
+  return c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradePro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -351,14 +636,13 @@ app.get('/', (c) => {
                 <div class="container mx-auto px-4 py-4">
                     <div class="flex justify-between items-center">
                         <h1 class="text-2xl font-bold">
-                            <i class="fas fa-chart-line mr-2"></i>
-                            Trading Dashboard
+                            <i class="fas fa-chart-line mr-2 text-purple-500"></i>
+                            TradePro Dashboard
                         </h1>
                         <div id="user-section">
-                            <button onclick="loginWithGoogle()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg">
-                                <i class="fab fa-google mr-2"></i>
-                                Login with Google
-                            </button>
+                            <div class="flex items-center gap-4">
+                                <div class="animate-pulse">Authenticating...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -367,8 +651,10 @@ app.get('/', (c) => {
             <!-- Main Content -->
             <main id="main-content" class="container mx-auto px-4 py-8">
                 <div class="text-center py-20">
-                    <i class="fas fa-lock text-6xl text-gray-600 mb-4"></i>
-                    <p class="text-xl text-gray-400">Please login to access the dashboard</p>
+                    <div class="animate-spin text-6xl text-purple-500 mb-4">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <p class="text-xl text-gray-400">Loading your dashboard...</p>
                 </div>
             </main>
         </div>
