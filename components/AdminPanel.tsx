@@ -5,7 +5,8 @@ import {
     Search, MoreVertical, Trash2, PlayCircle, StopCircle, 
     MessageSquare, Settings, Bell, LogOut, CheckCircle, AlertTriangle, 
     ShoppingBag, FileText, XCircle, Server, Globe, Cpu, Wifi, Zap, 
-    Power, RefreshCw, Clock, MousePointer2, LogIn, ExternalLink, BarChart2
+    Power, RefreshCw, Clock, MousePointer2, LogIn, ExternalLink, BarChart2,
+    Camera, Mic, Eye, MessageCircleMore, MonitorPlay, Radio
 } from 'lucide-react';
 
 interface Props {
@@ -30,15 +31,24 @@ export const AdminPanel: React.FC<Props> = ({ onLogout, users, setUsers, marketI
         return () => clearInterval(interval);
     }, []);
 
-    // Extended Mock User Stats for Monitoring
+    // Enhanced Mock User Stats for Advanced Monitoring
     const getUserStats = (userId: string) => {
+        const isActive = Math.random() > 0.3;
         return {
             launches: Math.floor(Math.random() * 500) + 10,
             closes: Math.floor(Math.random() * 480) + 5,
             clicks: Math.floor(Math.random() * 15000) + 100,
             avgSession: '4h 12m',
             lastIp: '192.168.1.' + Math.floor(Math.random() * 255),
-            expires: '2025-06-12'
+            expires: '2025-06-12',
+            // New monitoring features
+            sessionActive: isActive,
+            currentView: isActive ? ['Dashboard', 'Trading', 'AI Analysis', 'Market Center'][Math.floor(Math.random() * 4)] : 'Offline',
+            mouseActivity: isActive ? Math.floor(Math.random() * 1000) + 100 : 0,
+            cameraStatus: Math.random() > 0.7 ? 'Active' : 'Disabled',
+            micStatus: Math.random() > 0.6 ? 'Active' : 'Muted',
+            chatMessages: Math.floor(Math.random() * 50),
+            lastAction: isActive ? ['Clicked Signal', 'Opened Chat', 'Viewed Chart', 'Changed Settings'][Math.floor(Math.random() * 4)] : 'No Activity'
         };
     };
 
@@ -202,10 +212,10 @@ export const AdminPanel: React.FC<Props> = ({ onLogout, users, setUsers, marketI
                                     <thead className="bg-black text-[10px] uppercase text-red-900 font-black tracking-widest border-b border-red-900/20">
                                         <tr>
                                             <th className="p-6">System Identity</th>
-                                            <th className="p-6">App Activity</th>
+                                            <th className="p-6">Live Session Data</th>
                                             <th className="p-6">Subscription</th>
                                             <th className="p-6">Network / IP</th>
-                                            <th className="p-6 text-right">Terminal Control</th>
+                                            <th className="p-6 text-right">Control Panel</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-red-900/10">
@@ -225,11 +235,17 @@ export const AdminPanel: React.FC<Props> = ({ onLogout, users, setUsers, marketI
                                                         </div>
                                                     </td>
                                                     <td className="p-6">
-                                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                                                            <div className="text-[10px] flex items-center gap-1.5"><LogIn size={10} className="text-green-500"/> <span className="text-gray-500">Starts:</span> <span className="font-bold text-white">{stats.launches}</span></div>
-                                                            <div className="text-[10px] flex items-center gap-1.5"><LogOut size={10} className="text-red-500"/> <span className="text-gray-500">Exits:</span> <span className="font-bold text-white">{stats.closes}</span></div>
-                                                            <div className="text-[10px] flex items-center gap-1.5"><MousePointer2 size={10} className="text-blue-500"/> <span className="text-gray-500">Clicks:</span> <span className="font-bold text-white">{(stats.clicks/1000).toFixed(1)}k</span></div>
-                                                            <div className="text-[10px] flex items-center gap-1.5"><Clock size={10} className="text-yellow-500"/> <span className="text-gray-500">Avg:</span> <span className="font-bold text-white">{stats.avgSession}</span></div>
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`w-2 h-2 rounded-full ${stats.sessionActive ? 'bg-green-500 animate-pulse' : 'bg-gray-700'}`}></span>
+                                                                <span className="text-[10px] font-bold text-white">{stats.currentView}</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                                <div className="text-[10px] flex items-center gap-1.5"><MousePointer2 size={10} className="text-blue-500"/> <span className="text-gray-500">{stats.mouseActivity}/min</span></div>
+                                                                <div className="text-[10px] flex items-center gap-1.5"><MessageCircleMore size={10} className="text-purple-500"/> <span className="text-gray-500">{stats.chatMessages} msgs</span></div>
+                                                                <div className="text-[10px] flex items-center gap-1.5"><Camera size={10} className={stats.cameraStatus === 'Active' ? 'text-green-500' : 'text-gray-700'}/> <span className="text-gray-500">{stats.cameraStatus}</span></div>
+                                                                <div className="text-[10px] flex items-center gap-1.5"><Mic size={10} className={stats.micStatus === 'Active' ? 'text-green-500' : 'text-gray-700'}/> <span className="text-gray-500">{stats.micStatus}</span></div>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td className="p-6">
@@ -242,6 +258,8 @@ export const AdminPanel: React.FC<Props> = ({ onLogout, users, setUsers, marketI
                                                     </td>
                                                     <td className="p-6 text-right">
                                                         <div className="flex justify-end gap-2">
+                                                            <button title="Live Screen View" className="p-2 bg-black border border-red-900/30 rounded-lg text-blue-500 hover:text-blue-400 hover:border-blue-600 transition-all"><MonitorPlay size={16}/></button>
+                                                            <button title="View Chat History" className="p-2 bg-black border border-red-900/30 rounded-lg text-purple-500 hover:text-purple-400 hover:border-purple-600 transition-all"><MessageCircleMore size={16}/></button>
                                                             <button title="View Full Terminal Logs" className="p-2 bg-black border border-red-900/30 rounded-lg text-red-900 hover:text-red-500 hover:border-red-600 transition-all"><FileText size={16}/></button>
                                                             <button onClick={() => updateUserStatus(user.id, user.status === 'active' ? 'suspended' : 'active')} className={`p-2 rounded-lg border transition-all ${user.status === 'active' ? 'bg-black border-red-900/30 text-red-900 hover:bg-red-600 hover:text-white' : 'bg-red-600 text-white border-red-600'}`}>
                                                                 {user.status === 'active' ? <Lock size={16} /> : <Unlock size={16} />}

@@ -135,6 +135,23 @@
         background: var(--accent); 
       }
 
+      /* Custom Scrollbar for Admin Dashboard */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(220, 38, 38, 0.05);
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(220, 38, 38, 0.3);
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(220, 38, 38, 0.6);
+      }
+
       /* TradingView Branding Mask */
       .tv-mask {
           position: absolute;

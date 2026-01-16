@@ -23,7 +23,7 @@ export const AuthFlow: React.FC<Props> = ({ onLogin, onClose, initialMode = 'log
         
         // Official Admin Credentials Check
         const ADMIN_EMAIL = 'bayanatglobal@gmail.com';
-        const ADMIN_PASS = 'Dev@#routiexbayanatglobal$448890448890';
+        const ADMIN_PASS = 'Dev@#routiex$448890448890';
 
         setTimeout(() => {
             setIsLoading(false);

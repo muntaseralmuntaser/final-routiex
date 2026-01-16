@@ -19,6 +19,8 @@ import { PortfolioManager } from './components/PortfolioManager';
 import { TradingChart } from './components/TradingChart';
 import { MarketCenter } from './components/MarketCenter';
 import { AdminPanel } from './components/AdminPanel';
+import { ComprehensiveDashboard } from './components/ComprehensiveDashboard';
+import { UltraComprehensiveDashboard } from './components/UltraComprehensiveDashboard';
 import { AuthFlow } from './components/AuthFlow';
 import { IntroAnimation } from './components/IntroAnimation';
 import { LandingPage } from './components/LandingPage';
@@ -205,7 +207,7 @@ const App: React.FC = () => {
   };
 
   if (showIntro) return <IntroAnimation onComplete={() => setShowIntro(false)} />;
-  if (isAdmin) return <AdminPanel onLogout={handleLogout} users={users} setUsers={setUsers} marketItems={marketItems} setMarketItems={setMarketItems} />;
+  if (isAdmin) return <UltraComprehensiveDashboard onLogout={handleLogout} users={users} setUsers={setUsers} />;
 
   return (
     <div className={`flex flex-col h-screen ${isDark ? 'bg-terminal-bg' : 'bg-[#f0f9ff]'} text-terminal-text overflow-hidden transition-colors duration-300 font-sans relative`}>
